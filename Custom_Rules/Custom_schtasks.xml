@@ -1,0 +1,51 @@
+<group name="windows,persistence,execution,custom_detections,T1053.005">
+
+  <rule id="100500" level="12">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.image" type="pcre2">(?i)schtasks\.exe$</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)\/sc.*once\/tr.*(cmd\.exe|powershell\.exe)</field>
+    <description>Suspicious Scheduled Task Payload: A task was created to run a command shell. Command: $(win.eventdata.commandLine)</description>
+    <mitre>
+      <id>T1053.005</id>
+    </mitre>
+  </rule>
+
+  <rule id="100501" level="12">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.image" type="pcre2">(?i)schtasks\.exe$</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)\/tr.*compmgmt\.msc.*\/sc\s+onlogon\/f</field>
+    <description>Suspicious Scheduled Task Payload: A task was created to run a command shell. Command: $(win.eventdata.commandLine)</description>
+    <mitre>
+      <id>T1053.005</id>
+    </mitre>
+  </rule>
+
+  <rule id="100502" level="12">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.image" type="pcre2">(?i)powershell\.exe$</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)Invoke-CimMethod.*PS_ScheduledTask.*RegisterByXml</field>
+    <description>Advanced Persistence: Scheduled Task created via PowerShell and WMI/CIM (T1053.005).</description>
+    <mitre>
+      <id>T1053.005</id>
+    </mitre>
+  </rule>
+
+  <rule id="100503" level="12">
+    <if_sid>92041</if_sid>
+    <field name="win.eventdata.image" type="pcre2">(?i)reg\.exe$</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)add.*mscfile\\\\shell\\\\open\\\\command</field>
+    <description>Persistence Technique Detected: MSC File Association Hijack via Registry (T1548.002). Command: $(win.eventdata.commandLine)</description>
+    <mitre>
+      <id>T1548.002</id>
+    </mitre>
+  </rule>
+
+  <rule id="110100" level="15">
+    <if_sid>100501,100503</if_sid>
+    <description>Attack Pattern Detected: UAC Bypass and scheduled task creation via MSC file hijack. Command: $(win.eventdata.commandLine).</description>
+    <mitre>
+        <id>T1053.005</id>
+    </mitre>
+  </rule>
+
+</group>
